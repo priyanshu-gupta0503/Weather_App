@@ -1,5 +1,12 @@
-// ignore_for_file: unused_import, unused_local_variable, unnecessary_const, prefer_interpolation_to_compose_strings
+// ignore_for_file: unused_element, duplicate_import, unused_import, unused_local_variable, prefer_interpolation_to_compose_strings
 
+import 'package:flutter/material.dart';
+// ignore: unused_import
+import 'package:weather/src/pages/splash.dart';
+import '../model/weather_model.dart';
+import 'package:http/http.dart' as https;
+import 'dart:convert';
+// ignore: duplicate_import
 import 'package:flutter/material.dart';
 // ignore: unnecessary_import
 import 'package:flutter/widgets.dart';
@@ -10,20 +17,17 @@ import 'package:weather/src/icons/icon.dart';
 import 'dart:async';
 import 'package:weather/src/services/weather_app.dart';
 
-import '../model/weather_model.dart';
-import 'package:weather/src/pages/search.dart';
-
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+class SearchPage extends StatefulWidget {
+  const SearchPage({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  State<SearchPage> createState() => _SearchPageState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SearchPageState extends State<SearchPage> {
   bool loading = true;
   late Weather weatherinfo;
-  getWeatherInfo({String city = "bhubaneshwar"}) async {
+  getWeatherInfo({String city = "bhubaneswar"}) async {
     try {
       var response = await https.get(Uri.parse(
           "https://api.openweathermap.org/data/2.5/weather?q=$city&appid=e6d9846ba2796805199d85e505103ccb&units=metric"));
@@ -70,7 +74,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const sizedBox = const SizedBox(
+    const sizedBox = SizedBox(
       height: 8,
     );
     int? unixTimestamp = weatherinfo
@@ -101,17 +105,18 @@ class _SplashScreenState extends State<SplashScreen> {
         preferredSize: const Size.fromHeight(40.0),
         child: AppBar(
           backgroundColor: const Color.fromARGB(255, 5, 85, 151),
-          title: loading
-              ? const Text('Loading..')
-              : Text(weatherinfo.cityName.toString()),
+          title: const Text("Weather by city"),
           centerTitle: true,
           actions: [
             IconButton(
               icon: const Icon(Icons.search_outlined),
               onPressed: () {
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const SearchPage()));
                 // ignore: avoid_print
-                showSearch(
-                    context: context, delegate: CustomSearch(getWeatherInfo()));
+                // showSearch(context: context, delegate: customsearch());
               },
             )
           ],
@@ -437,6 +442,96 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
               )),
             ),
+    );
+  }
+}
+
+class CustomSearch extends SearchDelegate {
+  List<String> allData = [
+    'Cuttack',
+    'Bhubaneswar',
+    'Kendrapara',
+    'Delhi',
+    'Varanasi'
+  ];
+
+  dynamic getWeatherInfo;
+
+  CustomSearch(this.getWeatherInfo);
+
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    return [
+      IconButton(
+          onPressed: () {
+            query = '';
+          },
+          icon: const Icon(Icons.clear))
+    ];
+  }
+
+  @override
+  Widget? buildLeading(BuildContext context) {
+    return IconButton(
+        onPressed: () {
+          close(context, null);
+        },
+        icon: const Icon(Icons.arrow_back));
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    List<String> matchQuery = [];
+    for (var item in allData) {
+      if (item.toLowerCase().contains(query.toLowerCase())) {
+        matchQuery.add(item);
+      }
+    }
+
+    if (matchQuery.isEmpty) {
+      matchQuery.add(query);
+    }
+    return ListView.builder(
+        itemCount: matchQuery.length,
+        itemBuilder: (context, index) {
+          var result = matchQuery[index];
+          return ListTile(
+            title: Text(result),
+            onTap: () {
+              getWeatherInfo(city: result.toString());
+              close(context, null); // it used to close the context.
+            },
+          );
+        });
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    List<String> matchQuery = ["#@"];
+    for (var item in allData) {
+      if (item.toLowerCase().contains(
+            query.toLowerCase(),
+          )) {
+        matchQuery.add(item);
+      } else {
+        matchQuery[0] = query;
+      }
+    }
+
+    return ListView.builder(
+      itemCount: matchQuery.length,
+      itemBuilder: (context, index) {
+        return ListTile(
+          title: Text(query),
+          onTap: () {
+            getWeatherInfo(
+              city: query.toString(),
+            );
+
+            close(context, null);
+          },
+        );
+      },
     );
   }
 }

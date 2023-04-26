@@ -10,6 +10,8 @@ class Weather {
   String? description;
   int? sunrise;
   int? sunset;
+  int? date;
+
   Weather({
     this.cityName,
     this.temp,
@@ -20,16 +22,17 @@ class Weather {
     this.description,
     this.sunrise,
     this.sunset,
+    this.date,
   });
-  Weather.fromJson(Map<String, dynamic> json) {
-    cityName = json["name"];
-    temp = json["main"]["temp"];
-    wind = json["wind"]["speed"];
-    humidity = json["main"]["humidity"];
-    pressure = json["main"]["pressure"];
-    visibility = json["visibility"];
-    description = json["weather"]["description"];
-    sunrise = json["sys"]["sunrise"];
-    sunset = json["sys"]["sunset"];
-  }
+  // Weather.fromJson(Map<String, dynamic> json) {
+  //   cityName = json["name"];
+  //   temp = json["main"]["temp"];
+  //   wind = json["wind"]["speed"];
+  //   humidity = json["main"]["humidity"];
+  //   pressure = json["main"]["pressure"];
+  //   visibility = json["visibility"];
+  //   description = json["weather"]["description"];
+  //   sunrise = json["sys"]["sunrise"];
+  //   sunset = json["sys"]["sunset"];
+  // }
 }
